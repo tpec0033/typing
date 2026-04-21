@@ -1,0 +1,1204 @@
+<artifact identifier="basketball-final-perfect" type="text/html" title="籃球分隊系統 - 最終完美版">
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="籃球分隊">
+    <title>🏀 籃球三對三分隊系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Sans TC', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        padding: 15px;
+        padding-bottom: 120px;
+        overflow-x: hidden;
+    }
+
+    .basketball-bg {
+        position: fixed;
+        width: 120px;
+        height: 120px;
+        opacity: 0.1;
+        animation: float 20s infinite ease-in-out;
+        pointer-events: none;
+        z-index: 0;
+        font-size: 120px;
+    }
+
+    .basketball-bg:nth-child(1) { top: 10%; left: 10%; }
+    .basketball-bg:nth-child(2) { top: 60%; right: 15%; animation-delay: 5s; }
+    .basketball-bg:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 10s; }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(180deg); }
+    }
+    
+    .container {
+        max-width: 650px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-decoration {
+        height: 6px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #4CAF50, #FF9800);
+        border-radius: 10px;
+        margin-bottom: 25px;
+        animation: rainbow 3s linear infinite;
+        background-size: 200% 100%;
+    }
+
+    @keyframes rainbow {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    
+    h1 {
+        text-align: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 30px;
+        font-size: 32px;
+        font-weight: 800;
+        position: relative;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 2px;
+    }
+
+    .install-banner {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        display: none;
+    }
+
+    .install-banner.show { display: block; animation: slideDown 0.5s ease-out; }
+
+    @keyframes slideDown {
+        from { transform: translateY(-100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .install-banner h3 { font-size: 17px; margin-bottom: 8px; }
+    .install-banner p { font-size: 14px; margin-bottom: 12px; }
+    .install-banner button {
+        background: white;
+        color: #4CAF50;
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        width: auto;
+        margin: 5px;
+    }
+    .install-banner .close-btn {
+        background: transparent;
+        color: white;
+        padding: 5px 10px;
+        opacity: 0.8;
+    }
+    
+    /* ========== 超美抽籤動畫 ========== */
+    .lottery-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(102,126,234,0.3));
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .lottery-overlay.active { 
+        display: flex;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .lottery-container { 
+        text-align: center; 
+        padding: 30px;
+        position: relative;
+    }
+
+    /* 發光效果 */
+    .lottery-glow {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
+        animation: pulse-glow 2s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+    }
+
+    /* 輪盤 */
+    .lottery-wheel {
+        width: 320px;
+        height: 320px;
+        margin: 0 auto 30px;
+        position: relative;
+        filter: drop-shadow(0 0 40px rgba(255,215,0,0.5));
+    }
+
+    .lottery-wheel.spinning {
+        animation: wheelSpin 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    @keyframes wheelSpin {
+        0% { 
+            transform: rotate(0deg) scale(1);
+            filter: drop-shadow(0 0 40px rgba(255,215,0,0.5));
+        }
+        25% { 
+            transform: rotate(900deg) scale(1.15);
+            filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
+        }
+        50% { 
+            transform: rotate(1800deg) scale(1.2);
+            filter: drop-shadow(0 0 80px rgba(255,215,0,1));
+        }
+        75% { 
+            transform: rotate(2700deg) scale(1.15);
+            filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
+        }
+        100% { 
+            transform: rotate(3600deg) scale(1);
+            filter: drop-shadow(0 0 40px rgba(255,215,0,0.5));
+        }
+    }
+
+    .wheel-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(
+            from 0deg,
+            #667eea 0deg 45deg,
+            #764ba2 45deg 90deg,
+            #4CAF50 90deg 135deg,
+            #FF9800 135deg 180deg,
+            #f44336 180deg 225deg,
+            #2196F3 225deg 270deg,
+            #9C27B0 270deg 315deg,
+            #00BCD4 315deg 360deg
+        );
+        box-shadow: 
+            0 20px 80px rgba(102, 126, 234, 0.8),
+            inset 0 0 80px rgba(255, 255, 255, 0.2),
+            0 0 0 15px rgba(255,255,255,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        animation: rotate-slow 10s linear infinite;
+    }
+
+    @keyframes rotate-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .wheel-center {
+        width: 130px;
+        height: 130px;
+        background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+        box-shadow: 
+            0 10px 40px rgba(0,0,0,0.4),
+            inset 0 4px 15px rgba(255,255,255,0.8);
+        z-index: 1;
+        animation: basketball-bounce 1s ease-in-out infinite;
+    }
+
+    @keyframes basketball-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .wheel-pointer {
+        position: absolute;
+        top: -35px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 30px solid transparent;
+        border-right: 30px solid transparent;
+        border-top: 45px solid #FFD700;
+        filter: drop-shadow(0 8px 20px rgba(255, 215, 0, 0.8));
+        z-index: 2;
+        animation: pointer-pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pointer-pulse {
+        0%, 100% { transform: translateX(-50%) scale(1); }
+        50% { transform: translateX(-50%) scale(1.1); }
+    }
+
+    /* 文字動畫 */
+    .lottery-text {
+        color: white;
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 30px;
+        text-shadow: 
+            0 0 10px rgba(255,215,0,0.8),
+            0 0 20px rgba(255,215,0,0.6),
+            0 0 30px rgba(255,215,0,0.4);
+        animation: text-glow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes text-glow {
+        0%, 100% { 
+            text-shadow: 
+                0 0 10px rgba(255,215,0,0.8),
+                0 0 20px rgba(255,215,0,0.6),
+                0 0 30px rgba(255,215,0,0.4);
+        }
+        50% { 
+            text-shadow: 
+                0 0 20px rgba(255,215,0,1),
+                0 0 30px rgba(255,215,0,0.8),
+                0 0 40px rgba(255,215,0,0.6);
+        }
+    }
+
+    .lottery-status {
+        color: #FFD700;
+        font-size: 24px;
+        font-weight: 800;
+        margin-top: 30px;
+        min-height: 35px;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        animation: status-flash 1s ease-in-out infinite;
+    }
+
+    @keyframes status-flash {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    /* 超多彩帶！ */
+    .confetti {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
+        animation: confettiFall 4s linear;
+    }
+
+    @keyframes confettiFall {
+        0% {
+            transform: translateY(-100vh) rotate(0deg) scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: translateY(50vh) rotate(360deg) scale(1.2);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(100vh) rotate(720deg) scale(0.8);
+            opacity: 0;
+        }
+    }
+
+    /* 煙火效果 */
+    .firework {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        animation: firework-explode 1s ease-out;
+    }
+
+    @keyframes firework-explode {
+        0% {
+            transform: translate(0, 0) scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(var(--x), var(--y)) scale(1);
+            opacity: 0;
+        }
+    }
+
+    /* 光環效果 */
+    .ring {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border: 4px solid rgba(255,215,0,0.5);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: ring-expand 2s ease-out infinite;
+        pointer-events: none;
+    }
+
+    @keyframes ring-expand {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0;
+        }
+    }
+
+    /* ========== 其他樣式 ========== */
+    .mode-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        background: #f5f5f5;
+        padding: 6px;
+        border-radius: 18px;
+    }
+    
+    .mode-btn {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        background: transparent;
+        color: #666;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .mode-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .mode-content { display: none; }
+    .mode-content.active {
+        display: block;
+        animation: fadeInUp 0.4s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .input-group { margin-bottom: 20px; }
+    .input-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: #333;
+        font-size: 16px;
+    }
+    
+    .input-group input {
+        width: 100%;
+        padding: 16px;
+        font-size: 17px;
+        border: 2px solid #e0e0e0;
+        border-radius: 14px;
+        transition: all 0.3s;
+        background: #fafafa;
+    }
+    
+    .input-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    button {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-size: 18px;
+        font-weight: 800;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: all 0.3s;
+        box-shadow: 0 5px 18px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:active { transform: scale(0.97); }
+    
+    button.secondary {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        box-shadow: 0 5px 18px rgba(76, 175, 80, 0.4);
+    }
+    
+    button.danger {
+        background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+        box-shadow: 0 5px 18px rgba(244, 67, 54, 0.4);
+    }
+
+    button.preset {
+        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        box-shadow: 0 5px 18px rgba(255, 152, 0, 0.4);
+        padding: 15px;
+        font-size: 16px;
+    }
+    
+    .player-list {
+        margin: 20px 0;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    
+    .player-item {
+        background: #f8f9fa;
+        padding: 16px;
+        margin: 10px 0;
+        border-radius: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 17px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    .player-item input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        margin-right: 12px;
+    }
+    
+    .player-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .player-name { font-weight: 700; }
+    .player-number {
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .player-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .edit-btn, .delete-btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        width: auto;
+        margin: 0;
+    }
+
+    .edit-btn {
+        background: #2196F3;
+        color: white;
+        box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+    }
+
+    .delete-btn {
+        background: #f44336;
+        color: white;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+    }
+    
+    .team {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 6px solid #2196F3;
+        padding: 22px;
+        margin-bottom: 18px;
+        border-radius: 18px;
+        box-shadow: 0 5px 18px rgba(33, 150, 243, 0.25);
+        animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .team h3 {
+        color: #2196F3;
+        margin-bottom: 14px;
+        font-size: 22px;
+        font-weight: 800;
+    }
+    
+    .team-member {
+        background: white;
+        padding: 15px;
+        margin: 9px 0;
+        border-radius: 12px;
+        font-size: 17px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+    }
+    
+    .stats {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+        padding: 20px;
+        border-radius: 14px;
+        text-align: center;
+        margin-bottom: 22px;
+        font-size: 18px;
+        font-weight: 800;
+        color: #856404;
+        box-shadow: 0 4px 14px rgba(255, 193, 7, 0.3);
+    }
+    
+    .footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        padding: 16px 18px;
+        box-shadow: 0 -4px 25px rgba(0,0,0,0.15);
+        display: none;
+        justify-content: center;
+        gap: 12px;
+        z-index: 1000;
+    }
+    
+    .footer.active { display: flex; }
+    .footer button {
+        flex: 1;
+        max-width: 180px;
+        margin: 0;
+        padding: 15px;
+        font-size: 16px;
+    }
+
+    .tips {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 5px solid #4CAF50;
+        padding: 15px;
+        margin: 17px 0;
+        border-radius: 12px;
+        font-size: 15px;
+        color: #2e7d32;
+        line-height: 1.6;
+    }
+    
+    .empty-state {
+        text-align: center;
+        color: #999;
+        padding: 45px 20px;
+        font-size: 16px;
+        background: #f9f9f9;
+        border-radius: 14px;
+        border: 2px dashed #ddd;
+    }
+
+    .preset-players {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        border-left: 5px solid #FF9800;
+        padding: 15px;
+        margin: 17px 0;
+        border-radius: 12px;
+    }
+
+    .preset-players h4 {
+        color: #F57C00;
+        margin-bottom: 12px;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .select-all {
+        background: #e3f2fd;
+        padding: 12px;
+        border-radius: 10px;
+        margin: 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+    }
+
+    .select-all input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    @media (max-width: 480px) {
+        body { padding: 12px; padding-bottom: 100px; }
+        .container { padding: 25px 20px; }
+        h1 { font-size: 26px; }
+        .lottery-wheel { width: 280px; height: 280px; }
+        .lottery-text { font-size: 26px; }
+        .lottery-status { font-size: 20px; }
+    }
+</style>
+</head>
+<body>
+    <div class="basketball-bg">🏀</div>
+    <div class="basketball-bg">🏀</div>
+    <div class="basketball-bg">🏀</div>
+<!-- 超美抽籤動畫 -->
+<div id="lotteryOverlay" class="lottery-overlay">
+    <div class="lottery-glow"></div>
+    <div class="ring"></div>
+    <div class="ring" style="animation-delay: 0.5s;"></div>
+    <div class="ring" style="animation-delay: 1s;"></div>
+    <div class="lottery-container">
+        <div class="lottery-text">🎰 正在抽籤分組...</div>
+        <div class="wheel-pointer"></div>
+        <div class="lottery-wheel" id="lotteryWheel">
+            <div class="wheel-inner">
+                <div class="wheel-center">🏀</div>
+            </div>
+        </div>
+        <div class="lottery-status" id="lotteryStatus">準備中...</div>
+    </div>
+</div>
+
+<div class="container">
+    <div id="installBanner" class="install-banner">
+        <h3>📱 安裝到手機</h3>
+        <p id="installInstructions">將此APP加入主畫面，使用更方便</p>
+        <div>
+            <button onclick="handleInstall()">查看教學</button>
+            <button class="close-btn" onclick="closeInstallBanner()">✕</button>
+        </div>
+    </div>
+
+    <div class="header-decoration"></div>
+    <h1>🏀 籃球三對三分隊系統</h1>
+    
+    <div class="mode-selector">
+        <button class="mode-btn active" onclick="switchMode('simple')">快速分組</button>
+        <button class="mode-btn" onclick="switchMode('advanced')">手動輸入</button>
+    </div>
+    
+    <div id="simple-mode" class="mode-content active">
+        <div class="tips">
+            💡 直接輸入人數，系統自動分配號碼並隨機分組
+        </div>
+        <div class="input-group">
+            <label for="simplePlayerCount">總人數</label>
+            <input type="number" id="simplePlayerCount" value="12" min="3" placeholder="輸入總人數">
+        </div>
+        <button onclick="quickGenerate()">🎲 立即分組</button>
+    </div>
+    
+    <div id="advanced-mode" class="mode-content">
+        <div class="tips">
+            💡 新增球員並勾選今日參加的球員進行分組
+        </div>
+
+        <div class="preset-players">
+            <h4>⚡ 快速操作</h4>
+            <button class="preset" onclick="loadPresetPlayers()">📋 載入預設球員名單 (25人)</button>
+        </div>
+
+        <div class="input-group">
+            <label for="playerName">球員名字</label>
+            <input type="text" id="playerName" placeholder="輸入球員名字" onkeypress="handleEnter(event)">
+        </div>
+        <button class="secondary" onclick="addPlayer()">➕ 加入球員</button>
+        
+        <div id="playerList" class="player-list"></div>
+        
+        <div id="selectAllContainer" class="select-all" style="display: none;">
+            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+            <label for="selectAll">全選 / 全不選</label>
+        </div>
+
+        <button onclick="advancedGenerate()" id="advancedGenerateBtn" style="display: none;">
+            🎲 開始分組 (<span id="selectedCount">0</span>人)
+        </button>
+        <button class="danger" onclick="clearAllPlayers()" id="clearBtn" style="display: none;">
+            🗑️ 清空所有球員
+        </button>
+    </div>
+    
+    <div id="teamResult"></div>
+</div>
+
+<div id="footer" class="footer">
+    <button class="danger" onclick="resetAll()">🔄 重新分組</button>
+    <button class="secondary" onclick="shareResult()">📤 複製全部結果</button>
+</div>
+
+<script>
+    let players = [];
+    let currentMode = 'simple';
+    let lastResult = '';
+
+    const presetPlayers = [
+        '邱ㄟ', '仕良', '小開', '家寧', '哲民', '阿正', '大王', '傑哥',
+        '阿包', '中元', 'JAMES', '小智', '阿凱', '龍哥', '亮宇', '鐵牛',
+        '雞排哥', '阿翔', '阿新', '博文', '立勤', 'Richard', '技安', '佑佑', '文旭'
+    ];
+
+    function getSecureRandom() {
+        const crypto = window.crypto || window.msCrypto;
+        if (crypto && crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            crypto.getRandomValues(array);
+            return array[0] / (0xffffffff + 1);
+        }
+        return Math.random();
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(getSecureRandom() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        for (let i = 0; i < array.length - 1; i++) {
+            const j = i + Math.floor(getSecureRandom() * (array.length - i));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        const swapCount = Math.floor(getSecureRandom() * array.length) + array.length;
+        for (let k = 0; k < swapCount; k++) {
+            const i = Math.floor(getSecureRandom() * array.length);
+            const j = Math.floor(getSecureRandom() * array.length);
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function createTeams(items) {
+        const teams = [];
+        const fullTeams = Math.floor(items.length / 3);
+        const remaining = items.length % 3;
+        
+        if (remaining === 1 && items.length >= 4) {
+            for (let i = 0; i < fullTeams - 1; i++) {
+                teams.push(items.slice(i * 3, (i + 1) * 3));
+            }
+            const lastFour = items.slice((fullTeams - 1) * 3);
+            teams.push(lastFour.slice(0, 2));
+            teams.push(lastFour.slice(2, 4));
+        } else {
+            for (let i = 0; i < fullTeams; i++) {
+                teams.push(items.slice(i * 3, (i + 1) * 3));
+            }
+            if (remaining > 0) {
+                teams.push(items.slice(fullTeams * 3));
+            }
+        }
+        return teams;
+    }
+
+    function showLotteryAnimation(callback) {
+        const overlay = document.getElementById('lotteryOverlay');
+        const wheel = document.getElementById('lotteryWheel');
+        const status = document.getElementById('lotteryStatus');
+        
+        overlay.classList.add('active');
+        status.textContent = '旋轉中...';
+        wheel.classList.add('spinning');
+        
+        createSuperConfetti();
+        createFireworks();
+        
+        setTimeout(function() {
+            wheel.classList.remove('spinning');
+            status.textContent = '✨ 分組完成！';
+            createSuccessFireworks();
+            
+            setTimeout(function() {
+                overlay.classList.remove('active');
+                if (callback) callback();
+            }, 1500);
+        }, 4000);
+    }
+
+    function createSuperConfetti() {
+        const overlay = document.getElementById('lotteryOverlay');
+        const colors = ['#667eea', '#764ba2', '#4CAF50', '#FF9800', '#f44336', '#2196F3', '#9C27B0', '#00BCD4', '#FFD700', '#FF69B4'];
+        
+        for (let i = 0; i < 100; i++) {
+            setTimeout(function() {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                confetti.style.animationDuration = (3 + Math.random() * 2) + 's';
+                overlay.appendChild(confetti);
+                
+                setTimeout(function() { confetti.remove(); }, 5000);
+            }, i * 30);
+        }
+    }
+
+    function createFireworks() {
+        const overlay = document.getElementById('lotteryOverlay');
+        const colors = ['#FFD700', '#FF69B4', '#00BCD4', '#4CAF50', '#FF9800'];
+        
+        for (let i = 0; i < 5; i++) {
+            setTimeout(function() {
+                const x = 20 + Math.random() * 60;
+                const y = 20 + Math.random() * 60;
+                
+                for (let j = 0; j < 12; j++) {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    firework.style.left = x + '%';
+                    firework.style.top = y + '%';
+                    
+                    const angle = (j / 12) * 2 * Math.PI;
+                    const distance = 50 + Math.random() * 50;
+                    firework.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+                    firework.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+                    
+                    overlay.appendChild(firework);
+                    setTimeout(function() { firework.remove(); }, 1000);
+                }
+            }, i * 800);
+        }
+    }
+
+    function createSuccessFireworks() {
+        const overlay = document.getElementById('lotteryOverlay');
+        const colors = ['#FFD700', '#FF69B4', '#00BCD4'];
+        
+        for (let i = 0; i < 3; i++) {
+            setTimeout(function() {
+                const positions = [{x: 25, y: 30}, {x: 50, y: 20}, {x: 75, y: 30}];
+                const pos = positions[i];
+                
+                for (let j = 0; j < 20; j++) {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.background = colors[i];
+                    firework.style.left = pos.x + '%';
+                    firework.style.top = pos.y + '%';
+                    
+                    const angle = (j / 20) * 2 * Math.PI;
+                    const distance = 60 + Math.random() * 40;
+                    firework.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+                    firework.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+                    
+                    overlay.appendChild(firework);
+                    setTimeout(function() { firework.remove(); }, 1000);
+                }
+            }, i * 200);
+        }
+    }
+
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+            if (!isStandalone) { showInstallBanner(); }
+        }, 2000);
+    });
+
+    function showInstallBanner() {
+        const banner = document.getElementById('installBanner');
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        if (isIOS || isAndroid) {
+            banner.classList.add('show');
+            setTimeout(function() { banner.classList.remove('show'); }, 10000);
+        }
+    }
+
+    function handleInstall() {
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+            alert('📱 iPhone 安裝步驟：\n\n1. 測試中 📤\n2. 測試中\n3. 測試中！');
+        } else {
+            alert('📱 Android 安裝步驟：\n\n1. 測試中 ⋮\n2. 測試中\n3. 測試中！');
+        }
+    }
+
+    function closeInstallBanner() {
+        document.getElementById('installBanner').classList.remove('show');
+    }
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.mode-btn').forEach(function(btn) { btn.classList.remove('active'); });
+        event.target.classList.add('active');
+        document.querySelectorAll('.mode-content').forEach(function(content) { content.classList.remove('active'); });
+        document.getElementById(mode + '-mode').classList.add('active');
+        document.getElementById('teamResult').innerHTML = '';
+        document.getElementById('footer').classList.remove('active');
+    }
+
+    function quickGenerate() {
+        const count = parseInt(document.getElementById('simplePlayerCount').value);
+        if (!count || count < 3) { alert('請輸入至少3人！'); return; }
+        
+        const numbers = [];
+        for (let i = 1; i <= count; i++) { numbers.push(i); }
+        shuffleArray(numbers);
+        
+        showLotteryAnimation(function() {
+            generateTeamsFromNumbers(numbers);
+            document.getElementById('footer').classList.add('active');
+        });
+    }
+
+    function generateTeamsFromNumbers(numbers) {
+        const teamResult = document.getElementById('teamResult');
+        teamResult.innerHTML = '<h2 style="text-align: center; margin: 30px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 26px; font-weight: 800;">🏆 分組結果</h2>';
+        
+        const teams = createTeams(numbers);
+        const stats = document.createElement('div');
+        stats.className = 'stats';
+        stats.innerHTML = '📊 總共 ' + numbers.length + ' 人，分成 ' + teams.length + ' 組';
+        teamResult.appendChild(stats);
+        
+        let resultText = '🏀 籃球分組結果\n═══════════════════\n總共 ' + numbers.length + ' 人，分成 ' + teams.length + ' 組\n═══════════════════\n\n';
+        
+        teams.forEach(function(team, index) {
+            resultText += '【第 ' + (index + 1) + ' 組】(' + team.length + '人)\n─────────────\n';
+            team.forEach(function(num) { resultText += '🏀 號碼 ' + num + '\n'; });
+            resultText += '\n';
+            
+            setTimeout(function() {
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = '<h3>🏆 第 ' + (index + 1) + ' 組 (' + team.length + '人)</h3>';
+                team.forEach(function(num) {
+                    teamDiv.innerHTML += '<div class="team-member">🏀 <strong>號碼 ' + num + '</strong></div>';
+                });
+                teamResult.appendChild(teamDiv);
+            }, index * 200);
+        });
+        
+        resultText += '═══════════════════\n分組完成！祝比賽愉快 🏀\n';
+        lastResult = resultText;
+    }
+
+    function handleEnter(event) {
+        if (event.key === 'Enter') { event.preventDefault(); addPlayer(); }
+    }
+
+    function loadPresetPlayers() {
+        if (players.length > 0 && !confirm('目前已有球員，確定要載入預設名單嗎？\n（會清空現有球員）')) return;
+        players = [];
+        presetPlayers.forEach(function(name, index) {
+            players.push({ name: name, selected: true, number: index + 1 });
+        });
+        updatePlayerList();
+        alert('✅ 已載入 ' + presetPlayers.length + ' 位預設球員！');
+    }
+
+    function addPlayer() {
+        const nameInput = document.getElementById('playerName');
+        const name = nameInput.value.trim();
+        if (!name) { alert('請輸入球員名字！'); return; }
+        if (players.some(function(p) { return p.name === name; })) { alert('此名字已存在！'); return; }
+        players.push({ name: name, selected: true, number: players.length + 1 });
+        nameInput.value = '';
+        updatePlayerList();
+    }
+
+    function updatePlayerList() {
+        const playerList = document.getElementById('playerList');
+        const selectedCount = document.getElementById('selectedCount');
+        const advancedGenerateBtn = document.getElementById('advancedGenerateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const selectAllContainer = document.getElementById('selectAllContainer');
+        
+        if (players.length === 0) {
+            playerList.innerHTML = '<div class="empty-state">尚無球員<br>請加入球員或載入預設名單</div>';
+            advancedGenerateBtn.style.display = 'none';
+            clearBtn.style.display = 'none';
+            selectAllContainer.style.display = 'none';
+            return;
+        }
+        
+        selectedCount.textContent = players.filter(function(p) { return p.selected; }).length;
+        playerList.innerHTML = '';
+        
+        players.forEach(function(player, index) {
+            const div = document.createElement('div');
+            div.className = 'player-item';
+            div.innerHTML = 
+                '<input type="checkbox" ' + (player.selected ? 'checked' : '') + ' onchange="togglePlayer(' + index + ')">' +
+                '<div class="player-info"><div class="player-name">' + player.name + '</div>' +
+                '<div class="player-number">號碼 ' + player.number + '</div></div>' +
+                '<div class="player-actions">' +
+                '<button class="edit-btn" onclick="editPlayer(' + index + ')">編輯</button>' +
+                '<button class="delete-btn" onclick="deletePlayer(' + index + ')">刪除</button></div>';
+            playerList.appendChild(div);
+        });
+        
+        advancedGenerateBtn.style.display = 'block';
+        clearBtn.style.display = 'block';
+        selectAllContainer.style.display = 'flex';
+    }
+
+    function togglePlayer(index) { players[index].selected = !players[index].selected; updatePlayerList(); }
+    function toggleSelectAll() {
+        const selectAll = document.getElementById('selectAll').checked;
+        players.forEach(function(p) { p.selected = selectAll; });
+        updatePlayerList();
+    }
+
+    function editPlayer(index) {
+        const newName = prompt('輸入新的名字:', players[index].name);
+        if (newName && newName.trim()) { players[index].name = newName.trim(); updatePlayerList(); }
+    }
+
+    function deletePlayer(index) {
+        players.splice(index, 1);
+        players.forEach(function(p, i) { p.number = i + 1; });
+        updatePlayerList();
+    }
+
+    function clearAllPlayers() {
+        if (confirm('確定要清空所有球員嗎？')) { players = []; updatePlayerList(); }
+    }
+
+    function advancedGenerate() {
+        const selectedPlayers = players.filter(function(p) { return p.selected; });
+        if (selectedPlayers.length < 3) { alert('至少需要選擇3名球員！'); return; }
+        
+        const playersToShuffle = selectedPlayers.map(function(p) { return {name: p.name, number: p.number}; });
+        shuffleArray(playersToShuffle);
+        
+        showLotteryAnimation(function() {
+            generateTeamsFromPlayers(playersToShuffle);
+            document.getElementById('footer').classList.add('active');
+        });
+    }
+
+    function generateTeamsFromPlayers(playerList) {
+        const teamResult = document.getElementById('teamResult');
+        teamResult.innerHTML = '<h2 style="text-align: center; margin: 30px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 26px; font-weight: 800;">🏆 分組結果</h2>';
+        
+        const teams = createTeams(playerList);
+        const stats = document.createElement('div');
+        stats.className = 'stats';
+        stats.innerHTML = '📊 總共 ' + playerList.length + ' 人，分成 ' + teams.length + ' 組';
+        teamResult.appendChild(stats);
+        
+        let resultText = '🏀 籃球分組結果\n═══════════════════\n總共 ' + playerList.length + ' 人，分成 ' + teams.length + ' 組\n═══════════════════\n\n';
+        
+        teams.forEach(function(team, index) {
+            resultText += '【第 ' + (index + 1) + ' 組】(' + team.length + '人)\n─────────────\n';
+            team.forEach(function(player) { resultText += '🏀 ' + player.name + ' (號碼 ' + player.number + ')\n'; });
+            resultText += '\n';
+            
+            setTimeout(function() {
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = '<h3>🏆 第 ' + (index + 1) + ' 組 (' + team.length + '人)</h3>';
+                team.forEach(function(player) {
+                    teamDiv.innerHTML += '<div class="team-member">🏀 <strong>' + player.name + '</strong> - 號碼 ' + player.number + '</div>';
+                });
+                teamResult.appendChild(teamDiv);
+            }, index * 200);
+        });
+        
+        resultText += '═══════════════════\n分組完成！祝比賽愉快 🏀\n';
+        lastResult = resultText;
+    }
+
+    function resetAll() {
+        if (currentMode === 'simple') { quickGenerate(); }
+        else { if (confirm('確定要重新分組嗎？')) advancedGenerate(); }
+    }
+
+    function shareResult() {
+        if (!lastResult) { alert('請先進行分組！'); return; }
+        if (navigator.share) {
+            navigator.share({ title: '籃球分組結果', text: lastResult }).catch(function() { copyToClipboard(); });
+        } else { copyToClipboard(); }
+    }
+
+    function copyToClipboard() {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(lastResult).then(function() {
+                alert('✅ 分組結果已完整複製！\n\n包含所有組別和每位成員的詳細資料。\n可直接貼到 LINE 或其他 APP 分享！');
+            }).catch(function() { fallbackCopy(); });
+        } else { fallbackCopy(); }
+    }
+
+    function fallbackCopy() {
+        const textArea = document.createElement('textarea');
+        textArea.value = lastResult;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            if (document.execCommand('copy')) {
+                alert('✅ 分組結果已完整複製！\n\n包含所有組別和每位成員的詳細資料。\n可直接貼到 LINE 或其他 APP 分享！');
+            } else { alert('📋 分組結果：\n\n' + lastResult); }
+        } catch(e) { alert('📋 分組結果：\n\n' + lastResult); }
+        document.body.removeChild(textArea);
+    }
+</script>
+</body>
+</html>
+</artifact>
