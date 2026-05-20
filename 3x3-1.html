@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>羅運 3x3 現場抽籤系統</title>
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <style>
+        :root { --primary: #ff8c00; --proxy: #3498db; --bg: #f8f9fa; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background: var(--bg); padding: 15px; }
+        .card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        h1 { color: var(--primary); text-align: center; font-size: 1.3rem; margin-bottom: 15px; }
+        .btn { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; }
+        .input-row { display: flex; gap: 8px; margin-top: 10px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .item { background: #fff; border: 2px solid #eee; padding: 15px 5px; border-radius: 12px; text-align: center; position: relative; }
+        .item.done { border-color: var(--primary); background: #fffcf5; }
+        .proxy-tag { position: absolute; top: 2px; left: 2px; background: var(--proxy); color: white; font-size: 10px; padding: 1px 4px; border-radius: 4px; }
+        .num { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: block; min-height: 1.8rem; }
+        #results { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; padding: 20px; display: none; overflow-y: auto; }
+        .team { border: 2px solid var(--primary); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<h1>🏀 羅運籃球 3x3 同步抽籤</h1>
+
+<div class="card">
+    <input type="text" id="pName" placeholder="輸入球員姓名..." style="width: 100%;">
+    <div class="input-row">
+        <button class="btn" style="background:var(--primary); flex:1;" onclick="join(false)">本人加入</button>
+        <button class="btn" style="background:var(--proxy); flex:1;" onclick="join(true)">幫人代抽</button>
+    </div>
+</div>
+
+<div class="card">
+    <p style="font-size: 0.8rem; color: gray;">點擊下方卡片抽號碼：</p>
+    <div class="grid" id="list"></div>
+</div>
+
+<div style="display: flex; gap: 10px;">
+    <button class="btn" style="background:#2c3e50; flex:2;" onclick="makeTeams()">發佈分組結果</button>
+    <button class="btn" style="background:#e74c3c; flex:1;" onclick="reset()">重設</button>
+</div>
+
+<div id="results">
+    <h2 style="text-align:center; color:var(--primary); margin-bottom:15px;">🏆 最終分組</h2>
+    <div id="team-list"></div>
+    <button class="btn" style="background:#ddd; width:100%; color:333; margin-top:10px;" onclick="hide()">關閉</button>
+</div>
+
+<script>
+    // --- ⚠️ 請填入你專案設定中的 apiKey 和 appId ---
+    const firebaseConfig = {
+        apiKey: "x3basketball", 
+        authDomain: "://firebaseapp.com",
+        databaseURL: "https://firebaseio.com",
+        projectId: "x3bask-94afa",
+        storageBucket: "://appspot.com",
+        messagingSenderId: "305282924151",
+        appId: "125298241866"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function join(isProxy) {
+        const name = document.getElementById('pName').value.trim();
+        if(name) db.ref('players').push({ name, num: null, isProxy });
+        document.getElementById('pName').value = '';
+    }
+
+    function draw(id, current) {
+        if(current) return;
+        db.ref('players').once('value', s => {
+            const data = s.val();
+            const total = Object.keys(data).length;
+            const used = Object.values(data).map(p => p.num).filter(n => n != null);
+            const pool = Array.from({length:total}, (_,i)=>i+1).filter(n => !used.includes(n));
+            if(pool.length) db.ref('players/'+id).update({ num: pool[Math.floor(Math.random()*pool.length)] });
+        });
+    }
+
+    db.ref('players').on('value', s => {
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        if(!s.val()) return;
+        Object.entries(s.val()).forEach(([id, p]) => {
+            const div = document.createElement('div');
+            div.className = `item ${p.num ? 'done' : ''}`;
+            div.onclick = () => draw(id, p.num);
+            div.innerHTML = `${p.isProxy?'<span class="proxy-tag">代</span>':''}<span class="num">${p.num||'?'}</span><span>${p.name}</span>`;
+            list.appendChild(div);
+        });
+    });
+
+    db.ref('res').on('value', s => {
+        const res = document.getElementById('results');
+        const list = document.getElementById('team-list');
+        if(!s.val()) { res.style.display='none'; return; }
+        res.style.display='block';
+        list.innerHTML = s.val().map((t,i)=>`<div class="team"><b>第 ${i+1} 組</b><br>${t.join(' 、 ')}</div>`).join('');
+    });
+
+    function makeTeams() {
+        db.ref('players').once('value', s => {
+            const p = Object.values(s.val()||{}).filter(x=>x.num).sort((a,b)=>a.num-b.num);
+            const teams = [];
+            for(let i=0; i<p.length; i+=3) teams.push(p.slice(i, i+3).map(x=>x.name));
+            db.ref('res').set(teams);
+        });
+    }
+    function hide() { document.getElementById('results').style.display='none'; }
+    function reset() { if(confirm('確定清空？')) db.ref('/').remove(); }
+</script>
+</body>
+</html>
