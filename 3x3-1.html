@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>羅運 3x3 現場抽籤系統</title>
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <style>
+        :root { --primary: #ff8c00; --proxy: #3498db; --bg: #f4f7f9; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        body { background: var(--bg); padding: 15px; color: #333; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        h1 { color: var(--primary); text-align: center; font-size: 1.4rem; margin-bottom: 15px; }
+        .btn { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        .input-row { display: flex; gap: 8px; margin-top: 10px; }
+        input { flex: 1; padding: 12px; border: 2px solid #edf2f7; border-radius: 10px; font-size: 1rem; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .item { background: #fff; border: 2px solid #edf2f7; padding: 15px 5px; border-radius: 12px; text-align: center; position: relative; }
+        .item.done { border-color: var(--primary); background: #fffcf5; }
+        .proxy-tag { position: absolute; top: 3px; left: 3px; background: var(--proxy); color: white; font-size: 10px; padding: 2px 4px; border-radius: 4px; font-weight: bold; }
+        .num { font-size: 1.8rem; font-weight: 800; color: var(--primary); display: block; min-height: 2.2rem; }
+        #results { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; padding: 20px; display: none; overflow-y: auto; }
+        .team { border: 2px solid var(--primary); border-radius: 12px; padding: 15px; margin-bottom: 12px; background: #fffcf5; }
+    </style>
+</head>
+<body>
+
+<h1>🏀 羅運 3x3 同步抽籤</h1>
+
+<div class="card">
+    <input type="text" id="pName" placeholder="輸入球員姓名...">
+    <div class="input-row">
+        <button class="btn" style="background:var(--primary); flex:1;" onclick="join(false)">本人加入</button>
+        <button class="btn" style="background:var(--proxy); flex:1;" onclick="join(true)">幫人代抽</button>
+    </div>
+</div>
+
+<div class="card">
+    <p style="font-size: 0.85rem; color: #718096; margin-bottom: 10px;">點擊名字抽取號碼籤：</p>
+    <div class="grid" id="list"></div>
+</div>
+
+<div style="display: flex; gap: 10px; padding-bottom: 30px;">
+    <button class="btn" style="background:#2c3e50; flex:2;" onclick="makeTeams()">發佈分組結果</button>
+    <button class="btn" style="background:#e53e3e; flex:1;" onclick="reset()">清空</button>
+</div>
+
+<div id="results">
+    <h2 style="text-align:center; color:var(--primary); margin-bottom:20px;">🏆 最終分組結果</h2>
+    <div id="team-list"></div>
+    <button class="btn" style="background:#edf2f7; width:100%; color:#4a5568; margin-top:15px;" onclick="hide()">暫時關閉</button>
+</div>
+
+<script>
+    // --- 根據您的圖片自動填寫的配置 ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBC8pUiQyXSYCfgCCqLyc42FEIWCXCGlJo",
+        authDomain: "://firebaseapp.com",
+        databaseURL: "https://firebaseio.com",
+        projectId: "x3basketball",
+        storageBucket: "x3basketball.firebasestorage.app",
+        messagingSenderId: "125298241866",
+        appId: "1:125298241866:web:07c601310ab4a6f2c791b3",
+        measurementId: "G-DTVE5E8FXC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function join(isProxy) {
+        const name = document.getElementById('pName').value.trim();
+        if(name) db.ref('players').push({ name, num: null, isProxy, ts: Date.now() });
+        document.getElementById('pName').value = '';
+    }
+
+    function draw(id, current) {
+        if(current) return;
+        db.ref('players').once('value', s => {
+            const data = s.val() || {};
+            const total = Object.keys(data).length;
+            const used = Object.values(data).map(p => p.num).filter(n => n != null);
+            const pool = Array.from({length:total}, (_,i)=>i+1).filter(n => !used.includes(n));
+            if(pool.length) {
+                const lucky = pool[Math.floor(Math.random()*pool.length)];
+                db.ref('players/'+id).update({ num: lucky });
+            }
+        });
+    }
+
+    db.ref('players').on('value', s => {
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        if(!s.val()) return;
+        Object.entries(s.val()).sort((a,b)=>a[1].ts - b[1].ts).forEach(([id, p]) => {
+            const div = document.createElement('div');
+            div.className = `item ${p.num ? 'done' : ''}`;
+            div.onclick = () => draw(id, p.num);
+            div.innerHTML = `${p.isProxy?'<span class="proxy-tag">代</span>':''}<span class="num">${p.num||'?'}</span><span style="font-size:0.9rem;">${p.name}</span>`;
+            list.appendChild(div);
+        });
+    });
+
+    db.ref('res').on('value', s => {
+        const res = document.getElementById('results');
+        const list = document.getElementById('team-list');
+        if(!s.val()) { res.style.display='none'; return; }
+        res.style.display='block';
+        list.innerHTML = s.val().map((t,i)=>`<div class="team"><b>第 ${i+1} 組</b><br>${t.join(' 、 ')}</div>`).join('');
+    });
+
+    function makeTeams() {
+        db.ref('players').once('value', s => {
+            const p = Object.values(s.val()||{}).filter(x=>x.num).sort((a,b)=>a.num-b.num);
+            if(p.length < 3) { alert('人數不足！'); return; }
+            const teams = [];
+            for(let i=0; i<p.length; i+=3) teams.push(p.slice(i, i+3).map(x=>x.name));
+            db.ref('res').set(teams);
+        });
+    }
+    function hide() { document.getElementById('results').style.display='none'; }
+    function reset() { if(confirm('確定要清空嗎？')) db.ref('/').remove(); }
+</script>
+</body>
+</html>
