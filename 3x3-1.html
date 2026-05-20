@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>羅運 3x3 同步抽籤系統</title>
+    <!-- 使用最相容的 CDN 載入方式 -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <style>
+        :root { --primary: #ff8c00; --proxy: #3498db; --bg: #f4f7f9; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft JhengHei", sans-serif; }
+        body { background: var(--bg); padding: 15px; color: #333; }
+        .container { max-width: 500px; margin: 0 auto; }
+        h1 { color: var(--primary); text-align: center; font-size: 1.5rem; margin: 15px 0; }
+        .card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        input { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 12px; font-size: 1rem; margin-bottom: 12px; outline: none; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        .btn-main { background: var(--primary); }
+        .btn-proxy { background: var(--proxy); }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .item { background: #fff; border: 2px solid #edf2f7; padding: 18px 5px; border-radius: 15px; text-align: center; position: relative; }
+        .item.done { border-color: var(--primary); background: #fffcf5; }
+        .proxy-tag { position: absolute; top: 5px; left: 5px; background: var(--proxy); color: white; font-size: 9px; padding: 2px 5px; border-radius: 5px; }
+        .num { font-size: 1.8rem; font-weight: 900; color: var(--primary); display: block; min-height: 2.2rem; }
+        #results-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; padding: 20px; display: none; overflow-y: auto; }
+        .team-card { border: 2px solid var(--primary); border-radius: 15px; padding: 15px; margin-bottom: 12px; }
+        .admin-bar { margin-top: 25px; display: flex; gap: 10px; padding-bottom: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏀 羅運 3x3 同步抽籤</h1>
+    <div id="connection-status" style="text-align:center; font-size:0.8rem; color:red; margin-bottom:10px;">正在連線至雲端...</div>
+
+    <div class="card">
+        <input type="text" id="pName" placeholder="輸入球員姓名...">
+        <div class="btn-group">
+            <button class="btn btn-main" onclick="join(false)">本人報名</button>
+            <button class="btn btn-proxy" onclick="join(true)">幫人代抽</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="grid" id="list"></div>
+    </div>
+
+    <div class="admin-bar">
+        <button class="btn" style="background: #2d3748; flex: 2;" onclick="makeTeams()">發佈最終分組</button>
+        <button class="btn" style="background: #e53e3e; flex: 1;" onclick="resetData()">清空</button>
+    </div>
+</div>
+
+<div id="results-overlay">
+    <h2 style="text-align:center; color:var(--primary); margin-bottom:20px;">🏆 最終分組結果</h2>
+    <div id="team-display"></div>
+    <button class="btn" style="background:#edf2f7; width:100%; color:#4a5568; margin-top:20px;" onclick="closeOverlay()">暫時關閉</button>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBC8pUiQyXSYCfgCCqLyc42FEIWCXCGlJo",
+        authDomain: "x3basketball.firebaseapp.com",
+        databaseURL: "https://firebaseio.com",
+        projectId: "x3basketball",
+        storageBucket: "x3basketball.firebasestorage.app",
+        messagingSenderId: "125298241866",
+        appId: "1:125298241866:web:07c601310ab4a6f2c791b3"
+    };
+
+    // 初始化
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 檢查連線狀態
+    const statusEl = document.getElementById('connection-status');
+    db.ref('.info/connected').on('value', (s) => {
+        if (s.val() === true) {
+            statusEl.innerText = "● 雲端連線正常";
+            statusEl.style.color = "green";
+        } else {
+            statusEl.innerText = "○ 正在重新連線...";
+            statusEl.style.color = "red";
+        }
+    });
+
+    function join(isProxy) {
+        const nameEl = document.getElementById('pName');
+        const name = nameEl.value.trim();
+        if(!name) { alert("請輸入名字"); return; }
+        
+        db.ref('players').push({ name, num: null, isProxy, ts: Date.now() })
+            .then(() => { nameEl.value = ''; })
+            .catch(e => { alert("報名失敗，請檢查網路：" + e.message); });
+    }
+
+    function draw(id, current) {
+        if(current) return;
+        db.ref('players').once('value', s => {
+            const data = s.val() || {};
+            const total = Object.keys(data).length;
+            const used = Object.values(data).map(p => p.num).filter(n => n != null);
+            const pool = [];
+            for(let i=1; i<=total; i++) { if(!used.includes(i)) pool.push(i); }
+            if(pool.length > 0) {
+                const lucky = pool[Math.floor(Math.random() * pool.length)];
+                db.ref('players/' + id).update({ num: lucky });
+            }
+        });
+    }
+
+    db.ref('players').on('value', s => {
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        if(!s.val()) return;
+        Object.entries(s.val()).sort((a,b) => a.ts - b.ts).forEach(([id, p]) => {
+            const div = document.createElement('div');
+            div.className = `item ${p.num ? 'done' : ''}`;
+            div.onclick = () => draw(id, p.num);
+            div.innerHTML = `${p.isProxy?'<span class="proxy-tag">代</span>':''}<span class="num">${p.num||'?'}</span><span style="font-size:0.9rem; font-weight:bold;">${p.name}</span>`;
+            list.appendChild(div);
+        });
+    });
+
+    db.ref('res').on('value', s => {
+        const overlay = document.getElementById('results-overlay');
+        const display = document.getElementById('team-display');
+        if(!s.val()) { overlay.style.display = 'none'; return; }
+        overlay.style.display = 'block';
+        display.innerHTML = s.val().map((t, i) => `<div class="team-card"><b style="color:var(--primary)">TEAM ${i+1}</b><br>${t.join(' 、 ')}</div>`).join('');
+    });
+
+    function makeTeams() {
+        db.ref('players').once('value', s => {
+            const p = Object.values(s.val()||{}).filter(x => x.num).sort((a,b) => a.num - b.num);
+            const teams = [];
+            for(let i=0; i<p.length; i+=3) teams.push(p.slice(i, i+3).map(x => x.name));
+            db.ref('res').set(teams);
+        });
+    }
+    function closeOverlay() { document.getElementById('results-overlay').style.display = 'none'; }
+    function resetData() { if(confirm("確定清空？")) db.ref('/').remove(); }
+</script>
+</body>
+</html>
