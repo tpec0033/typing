@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>🔑 密碼解碼大挑戰 🔑</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #F0F9FF; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; color: #0F172A; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .box { background: #FFF; padding: 30px; border-radius: 12px; text-align: center; width: 280px; border: 2px solid #0284C7; }
+        .container { width: 100%; max-width: 1050px; display: none; gap: 30px; grid-template-columns: 6.3fr 3.2fr; }
+        .full-width { grid-column: span 2; }
+        .card { padding: 15px; border-radius: 12px; display: flex; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid #CBD5E1; }
+        .table { border-collapse: separate; border-spacing: 5px; font-size: 30px; text-align: center; font-weight: 900; }
+        .table td { width: 50px; height: 50px; border-radius: 8px; border: 3px solid #0F172A; background: #FFF; }
+        .panel { background: #FFF; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid #CBD5E1; height: fit-content; }
+        .title { font-size: 20px; font-weight: bold; margin-bottom: 15px; border-left: 5px solid #0284C7; padding-left: 8px; display: flex; justify-content: space-between; }
+        .row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px dashed #E2E8F0; font-size: 36px; font-weight: 900; white-space: nowrap; }
+        .input { width: 120px; font-size: 26px; padding: 5px; text-align: center; border: 3px solid #0284C7; border-radius: 8px; color: #0284C7; font-weight: bold; }
+        .btn { background: #0284C7; color: #FFF; padding: 10px 20px; font-size: 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .rank-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .rank-table th { padding: 8px; background: #F1F5F9; color: #475569; }
+        .rank-table td { padding: 10px 4px; text-align: center; border-bottom: 1px solid #E2E8F0; }
+        .r-0 { background: #FEF08A; } .r-1 { background: #E2E8F0; } .r-2 { background: #FFEDD5; }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="loginOverlay"><div class="box">
+        <h3>🔑 特教解碼大挑戰</h3>
+        <input type="text" id="stuId" style="width:80%; padding:10px; text-align:center; font-size:18px; margin-bottom:15px;" placeholder="請輸入學號或座號" autofocus>
+        <button class="btn" style="width:88%;" onclick="login()">開始體驗</button>
+    </div></div>
+    
+    <div class="container" id="mainContainer">
+        <div class="full-width" style="text-align:center; margin-bottom:5px;">
+            <h1 style="color:#0284C7; font-weight:900;">🔑 密碼解碼大挑戰</h1>
+            <div style="background:#FFF; padding:6px 20px; border-radius:50px; display:inline-block; font-weight:bold; border:2px solid #0284C7;">
+                👤 挑戰者：<span id="showId" style="color:#0284C7;">-</span> <button style="margin-left:15px; cursor:pointer; background:#DC2626; color:#FFF; border:none; padding:3px 10px; border-radius:6px;" onclick="logout()">換人</button>
+            </div>
+        </div>
+        <div class="card full-width" id="cardBg"><table class="table"><tr id="r-num"></tr><tr id="r-sym"></tr></table></div>
+        <div class="panel">
+            <div class="title"><span id="stateText">請先閱讀上方密碼卡</span><span id="timerBox" style="color:#DC2626; display:none; font-weight:900;">⏳ <span id="sec">60</span> 秒</span></div>
+            <div id="previewArea" style="text-align:center; padding:35px 0; font-size:24px; font-weight:900; color:#DC2626;">👀 密碼強力記憶中... <span id="pSec" style="font-size:36px;">10</span> 秒後自動開考！</div>
+            <div id="quizArea" style="display:none;"><div id="quizList"></div><button class="btn" style="width:100%; background:#10B981;" onclick="submit()">提交答案 🏁</button></div>
+        </div>
+        <div class="panel"><div class="title">🏆 排行榜 (前6名)</div><table class="rank-table"><thead><tr><th>名次</th><th>學號</th><th>答對題數</th><th>花費時間</th></tr></thead><tbody id="rankBody"></tbody></table></div>
+    </div>
+
+    <script>
+        var numArr = ["1","2","3","4","5","6","7","8","9","0"], baseSyms = ["Δ","Ω","Θ","Λ","Φ","Ξ","Σ","Ψ","Γ","Π"], currentQuizzes = [], stuId = "", timer = null, left = 60, used = 0, pLeft = 10;
+        document.getElementById("stuId").addEventListener("keypress", function(e){ if(e.key === "Enter") login(); });
+        
+        function login() {
+            stuId = document.getElementById("stuId").value.trim(); if(!stuId) return alert("請輸入學號！");
+            document.getElementById("showId").innerText = stuId;
+            document.getElementById("loginOverlay").style.display = "none";
+            document.getElementById("mainContainer").style.display = "grid";
+            document.getElementById("cardBg").style.background = Math.random() > 0.5 ? "#FCE7F3" : "#DCFCE7";
+            document.getElementById("stateText").innerText = "任務狀態：請看上方密碼卡";
+            
+            var shuffledSyms = baseSyms.slice().sort(function(){ return Math.random() - 0.5; });
+            var nH = "", sH = "";
+            for(var i = 0; i < numArr.length; i++) { nH += "<td>" + numArr[i] + "</td>"; sH += "<td>" + shuffledSyms[i] + "</td>"; }
+            document.getElementById("r-num").innerHTML = nH;
+            document.getElementById("r-sym").innerHTML = sH;
+            
+            currentQuizzes = [];
+            var ops = ["+", "+", "-", "+", "+"];
+            for(var i = 0; i < 5; i++){
+                var n1 = Math.floor(Math.random() * 80) + 11, n2 = Math.floor(Math.random() * 9) + 1, ans = (ops[i] === "+") ? (n1 + n2) : (n1 - n2);
+                var s1 = shuffledSyms[numArr.indexOf(String(n1).charAt(0))] + shuffledSyms[numArr.indexOf(String(n1).charAt(1))];
+                var s2 = shuffledSyms[numArr.indexOf(String(n2).charAt(0))];
+                currentQuizzes.push({ q: s1 + " " + ops[i] + " " + s2, a: ans });
+            }
+            document.getElementById("previewArea").style.display = "block"; document.getElementById("quizArea").style.display = "none"; document.getElementById("timerBox").style.display = "none";
+            if(timer) clearInterval(timer); showRank(); pLeft = 10; document.getElementById("pSec").innerText = pLeft;
+            timer = setInterval(function(){ pLeft--; document.getElementById("pSec").innerText = pLeft; if(pLeft <= 0){ clearInterval(timer); startQuiz(); } }, 1000);
+        }
+        
+        function startQuiz() {
+            document.getElementById("previewArea").style.display = "none"; document.getElementById("quizArea").style.display = "block"; document.getElementById("timerBox").style.display = "inline"; document.getElementById("stateText").innerText = "任務狀態：請開始作答";
+            var html = "";
+            for(var i = 0; i < currentQuizzes.length; i++){ html += '<div class="row"><div style="font-size:20px; color:#64748b; width:40px;">0' + (i+1) + '</div><div style="flex-grow:1; letter-spacing:4px;">' + currentQuizzes[i].q + ' = </div><input type="number" class="input" id="ans-' + i + '"><div id="fb-' + i + '" style="width:55px; text-align:center; font-size:42px;"></div></div>'; }
+            document.getElementById("quizList").innerHTML = html; left = 60; used = 0; document.getElementById("sec").innerText = left;
+            timer = setInterval(function(){ left--; used++; document.getElementById("sec").innerText = left; if(left <= 0){ clearInterval(timer); alert("⏰ 時間到！自動交卷！"); submit(); } }, 1000);
+        }
+        
+        function submit() {
+            if(timer) clearInterval(timer); var score = 0;
+            for(var i = 0; i < currentQuizzes.length; i++){ var v = document.getElementById("ans-" + i).value, fb = document.getElementById("fb-" + i); if(v !== "" && parseInt(v) === currentQuizzes[i].a){ fb.innerText = "⭕"; fb.style.color = "#10B981"; score++; } else { fb.innerText = "❌"; fb.style.color = "#DC2626"; } }
+            var data = JSON.parse(localStorage.getItem("rk_final_v12")) || []; data.push({ id: stuId, s: score, t: used });
+            data.sort(function(a,b){ return b.s !== a.s ? b.s - a.s : a.t - b.t; }); localStorage.setItem("rk_final_v12", JSON.stringify(data.slice(0, 6))); showRank(); alert("挑戰結束！答對 " + score + " 題，耗時 " + used + " 秒！");
+        }
+        
+        function showRank() {
+            var data = JSON.parse(localStorage.getItem("rk_final_v12")) || [], html = "";
+            if(data.length === 0){ html = '<tr><td colspan="4" style="color:#64748b;padding:20px;font-weight:bold;">暫無紀錄</td></tr>'; } else {
+                for(var i = 0; i < data.length; i++){ html += '<tr class="r-' + i + '"><td>' + (i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1) + '</td><td style="font-weight:bold;">' + data[i].id + '</td><td>' + data[i].s + ' 題</td><td>' + data[i].t + ' 秒</td></tr>'; }
+            }
+            document.getElementById("rankBody").innerHTML = html;
+        }
+        
+        function logout() { if(timer) clearInterval(timer); document.getElementById("stuId").value = ""; document.getElementById("loginOverlay").style.display = "flex"; document.getElementById("mainContainer").style.display = "none"; }
+        window.onload = showRank;
+    </script>
+</body>
+</html>
+
