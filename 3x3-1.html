@@ -541,7 +541,7 @@
         }
 
         function substituteText(order, labelFn) {
-            var t = '🔀 候補補人順序（隨機）\n';
+            var t = '🔀 補人順序（在場上或play直接跳過）\n';
             order.forEach(function(item, idx) {
                 t += (idx + 1) + '. ' + labelFn(item) + '\n';
             });
