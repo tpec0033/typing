@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#667eea">
+<title>🏀 羅運籃球3x3 線上報名分組</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Noto Sans TC',Arial,sans-serif;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); background-attachment:fixed;
+  min-height:100vh; padding:10px; padding-bottom:40px; }
+.container { max-width:700px; margin:0 auto; background:rgba(255,255,255,.98); border-radius:25px; padding:22px; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+.bar { height:8px; background:linear-gradient(90deg,#667eea,#764ba2,#4CAF50,#FF9800); border-radius:10px; margin-bottom:16px; }
+h1 { text-align:center; background:linear-gradient(135deg,#667eea,#764ba2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-size:25px; font-weight:900; margin-bottom:6px; }
+.sub { text-align:center; font-size:13px; color:#777; margin-bottom:16px; }
+.warn { background:#ffebee; border-left:6px solid #f44336; color:#b71c1c; padding:12px; border-radius:12px; font-size:14px; margin-bottom:14px; line-height:1.6; }
+.card { border-radius:16px; padding:14px; margin-bottom:14px; }
+.c-orange { background:linear-gradient(135deg,#fff8e1,#ffecb3); border-left:6px solid #FF9800; }
+.c-green { background:linear-gradient(135deg,#e8f5e9,#c8e6c9); border-left:6px solid #4CAF50; }
+.c-gray { background:linear-gradient(135deg,#f5f5f5,#eee); }
+input[type=text], input[type=password] { width:100%; padding:14px; font-size:17px; border:2px solid #e0e0e0; border-radius:12px; background:#fafafa; margin-bottom:10px; }
+input:focus { outline:none; border-color:#667eea; background:#fff; }
+button { width:100%; padding:15px; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; border-radius:14px; font-size:17px; font-weight:900; cursor:pointer; margin-bottom:10px; box-shadow:0 5px 16px rgba(102,126,234,.45); }
+button:active { transform:scale(.98); }
+button.green { background:linear-gradient(135deg,#4CAF50,#45a049); box-shadow:0 5px 16px rgba(76,175,80,.45); }
+button.red { background:linear-gradient(135deg,#f44336,#e53935); box-shadow:0 5px 16px rgba(244,67,54,.45); }
+button.orange { background:linear-gradient(135deg,#FF9800,#F57C00); box-shadow:0 5px 16px rgba(255,152,0,.45); }
+.row { display:flex; gap:8px; } .row button { margin-bottom:0; }
+.status { text-align:center; font-size:18px; font-weight:900; color:#5b3fa0; margin:6px 0 10px; }
+.mine { text-align:center; font-size:15px; font-weight:800; color:#E65100; margin-bottom:8px; min-height:20px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(40px,1fr)); gap:6px; max-height:340px; overflow-y:auto; padding:4px; }
+.cell { width:auto; margin:0; padding:9px 0; font-size:15px; font-weight:800; background:#fff; color:#333; border:2px solid #e0e0e0; border-radius:10px; box-shadow:none; }
+.cell.taken { background:#e0e0e0; color:#9e9e9e; border-color:#e0e0e0; }
+.cell.me { background:linear-gradient(135deg,#FF9800,#F57C00); color:#fff; border-color:#F57C00; }
+.entry { display:flex; align-items:center; justify-content:space-between; background:#fff; border-radius:10px; padding:8px 10px; margin:6px 0; font-size:15px; box-shadow:0 2px 6px rgba(0,0,0,.08); }
+.entry .no { background:#667eea; color:#fff; border-radius:20px; padding:2px 10px; font-weight:900; font-size:13px; margin-right:8px; }
+.entry button { width:auto; padding:5px 12px; margin:0; font-size:13px; border-radius:8px; }
+.team { background:linear-gradient(135deg,#e3f2fd,#bbdefb); border-left:8px solid #2196F3; padding:18px; margin-bottom:14px; border-radius:18px; box-shadow:0 6px 18px rgba(33,150,243,.3); }
+.team h3 { color:#2196F3; margin-bottom:10px; font-size:21px; font-weight:900; }
+.member { background:#fff; padding:12px; margin:8px 0; border-radius:12px; font-size:17px; box-shadow:0 3px 8px rgba(0,0,0,.07); }
+.stats { background:linear-gradient(135deg,#fff3cd,#ffe69c); padding:16px; border-radius:14px; text-align:center; margin-bottom:12px; font-size:18px; font-weight:900; color:#856404; }
+.note { background:linear-gradient(135deg,#e0f7fa,#b2ebf2); border-left:6px solid #00ACC1; color:#00695C; padding:10px; border-radius:12px; font-size:14px; font-weight:700; text-align:center; margin-bottom:12px; }
+.round { background:#e3f2fd; color:#1976D2; padding:12px; border-radius:12px; text-align:center; font-weight:800; font-size:17px; margin-bottom:12px; }
+.suborder { background:linear-gradient(135deg,#f3e5f5,#e1bee7); border-left:8px solid #8E24AA; padding:16px; border-radius:18px; margin-bottom:14px; }
+.suborder h3 { color:#6A1B9A; font-size:20px; font-weight:900; margin-bottom:4px; }
+.suborder .hint { color:#7B1FA2; font-size:13px; margin-bottom:10px; }
+.sg { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.chip { background:#fff; border-radius:10px; padding:8px; display:flex; align-items:center; gap:6px; min-width:0; font-size:14px; }
+.chip i { font-style:normal; background:#8E24AA; color:#fff; border-radius:50%; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; }
+.chip span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.foot { text-align:center; font-size:12px; color:#888; margin:6px 0 14px; }
+h2.t { text-align:center; margin:18px 0; font-size:26px; font-weight:900; color:#5b3fa0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="bar"></div>
+  <h1>🏀 羅運籃球3x3 線上報名分組</h1>
+  <div class="sub">房間代碼：<b id="roomLabel"></b>　<span id="roleLabel"></span></div>
+  <div id="cfgWarn" class="warn" style="display:none">⚠️ 尚未設定 Firebase。請先把設定貼到程式最上方的 FIREBASE_CONFIG。</div>
+
+  <div id="regArea">
+    <div class="card c-orange">
+      <input type="text" id="nameInput" maxlength="10" placeholder="輸入你的姓名（最多10字）">
+      <div class="mine" id="mineText"></div>
+      <div class="status">已報名 <span id="regCount">0</span> 人</div>
+      <div class="grid" id="grid"></div>
+      <div style="font-size:12px;color:#777;margin-top:8px;text-align:center">先輸入姓名，再點一個號碼。灰色表示已被選走，點自己的橘色號碼可取消。</div>
+      <button class="green" id="renameBtn" style="display:none;margin-top:10px" onclick="renameMine()">✏️ 更新我的姓名</button>
+    </div>
+  </div>
+
+  <div id="hostPanel" style="display:none">
+    <div class="card c-green">
+      <div style="font-weight:900;color:#2e7d32;margin-bottom:8px">🛠 主持人控制台</div>
+      <button onclick="copyLink()">🔗 複製報名連結</button>
+      <button class="orange" onclick="hostGroup()" id="groupBtn">🎲 開始分組</button>
+      <div class="row">
+        <button class="green" onclick="reopen()">🔓 重新開放報名</button>
+        <button class="red" onclick="clearAll()">🗑 清空全部</button>
+      </div>
+    </div>
+    <div class="card c-gray">
+      <div style="font-weight:900;margin-bottom:6px">報名名單（可刪除報錯的人）</div>
+      <div id="entryList"></div>
+    </div>
+  </div>
+
+  <div id="resultArea"></div>
+  <button class="green" id="shareBtn" style="display:none" onclick="shareResult()">📤 分享結果到LINE</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+// ====== 請填入你的設定 ======
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBC8pUiQyXSYCfgCCqLyc42FEIWCXCglJo",
+  authDomain: "x3basketball.firebaseapp.com",
+  databaseURL: "https://x3basketball-default-rtdb.firebaseio.com",
+  projectId: "x3basketball",
+  appId: "1:125298241866:web:07c601310ab4a6f2c791b3"
+};
+var HOST_PIN = '1234';   // 主持人密碼（僅是前端提示，非嚴格安全）
+// ===========================
+
+// 主辦方規則：
+var avoidPairs = [ ['家寧', '小智'] ];
+var MAX_RETRY = 200;
+var REORDER_TEXT = '已進行第二次隨機，重新分配組別順序';
+
+var params = new URLSearchParams(location.search);
+var room = (params.get('room') || 'main').replace(/[^A-Za-z0-9_-]/g, '') || 'main';
+var isHost = false;
+var uid = localStorage.getItem('lx_uid');
+if (!uid) { uid = 'u' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('lx_uid', uid); }
+
+var entries = {};        // number -> {name, uid}
+var result = null;
+var lastText = '';
+var ref = null;
+
+function esc(s) { return String(s).replace(/[&<>"']/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function toArr(x) { if (!x) return []; if (Array.isArray(x)) return x.filter(function(v){return v!==null && v!==undefined;}); return Object.keys(x).sort(function(a,b){return a-b;}).map(function(k){return x[k];}); }
+
+document.getElementById('roomLabel').textContent = room;
+document.getElementById('nameInput').value = localStorage.getItem('lx_name') || '';
+
+// 主持人模式
+if (params.get('host') === '1') {
+  var pin = prompt('請輸入主持人密碼');
+  if (pin === HOST_PIN) { isHost = true; } else { alert('密碼錯誤，將以參加者身分進入。'); }
+}
+document.getElementById('roleLabel').textContent = isHost ? '（主持人）' : '（參加者）';
+if (isHost) document.getElementById('hostPanel').style.display = 'block';
+
+// 號碼格
+(function() {
+  var h = '';
+  for (var n = 1; n <= 99; n++) h += '<button class="cell" id="c' + n + '" onclick="pick(' + n + ')">' + n + '</button>';
+  document.getElementById('grid').innerHTML = h;
+})();
+
+// 連線
+if (FIREBASE_CONFIG.apiKey.indexOf('請貼上') === 0 || FIREBASE_CONFIG.databaseURL.indexOf('請貼上') === 0) {
+  document.getElementById('cfgWarn').style.display = 'block';
+} else {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  ref = firebase.database().ref('rooms/' + room);
+  ref.child('entries').on('value', function(s) { entries = s.val() || {}; renderEntries(); });
+  ref.child('result').on('value', function(s) { result = s.val(); renderResult(); renderEntries(); });
+}
+
+function myNumber() {
+  for (var k in entries) { if (entries[k] && entries[k].uid === uid) return parseInt(k, 10); }
+  return null;
+}
+
+function renderEntries() {
+  var keys = Object.keys(entries).map(Number).sort(function(a,b){return a-b;});
+  document.getElementById('regCount').textContent = keys.length;
+  var mine = myNumber();
+  for (var n = 1; n <= 99; n++) {
+    var c = document.getElementById('c' + n);
+    c.className = 'cell' + (entries[n] ? (mine === n ? ' me' : ' taken') : '');
+  }
+  document.getElementById('mineText').textContent = mine ? ('你目前的號碼：' + mine + ' 號（' + entries[mine].name + '）') : '';
+  document.getElementById('renameBtn').style.display = mine ? 'block' : 'none';
+  if (isHost) {
+    var h = '';
+    keys.forEach(function(n) {
+      h += '<div class="entry"><div><span class="no">' + n + '</span>' + esc(entries[n].name) + '</div>' +
+           '<button class="red" onclick="delEntry(' + n + ')">刪除</button></div>';
+    });
+    document.getElementById('entryList').innerHTML = h || '<div style="color:#999;text-align:center;padding:10px">尚無人報名</div>';
+  }
+}
+
+function getName() {
+  var v = document.getElementById('nameInput').value.trim();
+  if (!v) { alert('請先輸入姓名！'); return null; }
+  localStorage.setItem('lx_name', v);
+  return v;
+}
+
+function nameTaken(name) {
+  for (var k in entries) { if (entries[k] && entries[k].name === name && entries[k].uid !== uid) return true; }
+  return false;
+}
+
+function pick(n) {
+  if (!ref) { alert('尚未連線，請確認 Firebase 設定'); return; }
+  if (result) { alert('已完成分組，報名已關閉。'); return; }
+  var mine = myNumber();
+  if (mine === n) {   // 點自己的號碼＝取消
+    ref.child('entries/' + n).remove();
+    return;
+  }
+  var name = getName(); if (!name) return;
+  if (nameTaken(name)) { alert('這個姓名已經有人報名了。'); return; }
+  ref.child('entries/' + n).transaction(function(cur) {
+    if (cur === null) return { name: name, uid: uid, ts: Date.now() };
+    return;   // 已被選走，放棄
+  }, function(err, committed) {
+    if (err) { alert('連線失敗，請再試一次。'); return; }
+    if (!committed) { alert('這個號碼剛剛被別人選走了，請換一個。'); return; }
+    if (mine && mine !== n) ref.child('entries/' + mine).remove();
+  });
+}
+
+function renameMine() {
+  var mine = myNumber(); if (!mine) return;
+  var name = getName(); if (!name) return;
+  if (nameTaken(name)) { alert('這個姓名已經有人報名了。'); return; }
+  ref.child('entries/' + mine + '/name').set(name);
+}
+
+function delEntry(n) {
+  if (confirm('確定刪除 ' + n + ' 號（' + entries[n].name + '）？')) ref.child('entries/' + n).remove();
+}
+
+// ===== 隨機與分組 =====
+function rnd() {
+  var c = window.crypto || window.msCrypto;
+  if (c && c.getRandomValues) { var a = new Uint32Array(1); c.getRandomValues(a); return a[0] / 4294967296; }
+  return Math.random();
+}
+function shuffle(arr) {
+  var i, j, t;
+  for (i = arr.length - 1; i > 0; i--) { j = Math.floor(rnd() * (i + 1)); t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+  for (i = 0; i < arr.length - 1; i++) { j = i + Math.floor(rnd() * (arr.length - i)); t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+  var s = Math.floor(rnd() * arr.length) + arr.length;
+  for (var k = 0; k < s; k++) { i = Math.floor(rnd() * arr.length); j = Math.floor(rnd() * arr.length); t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+  return arr;
+}
+function createTeams(items) {
+  var teams = [], full = Math.floor(items.length / 3), rem = items.length % 3, i;
+  if (rem === 1 && items.length >= 4) {
+    for (i = 0; i < full - 1; i++) teams.push(items.slice(i * 3, i * 3 + 3));
+    var last = items.slice((full - 1) * 3);
+    teams.push(last.slice(0, 2)); teams.push(last.slice(2, 4));
+  } else {
+    for (i = 0; i < full; i++) teams.push(items.slice(i * 3, i * 3 + 3));
+    if (rem > 0) teams.push(items.slice(full * 3));
+  }
+  return teams;
+}
+function activeRules(names) {
+  return avoidPairs.filter(function(p) { return names.indexOf(p[0]) >= 0 && names.indexOf(p[1]) >= 0; });
+}
+function violates(list, rules) {
+  var teams = createTeams(list.slice());
+  for (var i = 0; i < teams.length; i++) {
+    var ns = teams[i].map(function(x) { return x.name; });
+    for (var j = 0; j < rules.length; j++) if (ns.indexOf(rules[j][0]) >= 0 && ns.indexOf(rules[j][1]) >= 0) return true;
+  }
+  return false;
+}
+
+function hostGroup() {
+  if (!isHost) return;
+  var list = Object.keys(entries).map(function(n) { return { n: parseInt(n, 10), name: entries[n].name }; });
+  if (list.length < 3) { alert('至少需要 3 人報名才能分組！'); return; }
+  if (result && !confirm('已經有分組結果，確定要重新分組嗎？')) return;
+  var rules = activeRules(list.map(function(x) { return x.name; }));
+  var tries = 0;
+  do { shuffle(list); tries++; } while (rules.length > 0 && violates(list, rules) && tries < MAX_RETRY);
+  var teams = shuffle(createTeams(list).slice());           // 第二次洗牌：組別順序
+  var order = shuffle(list.slice());                         // 候補補人順序
+  ref.child('round').transaction(function(c) { return (c || 0) + 1; }, function(err, ok, snap) {
+    if (err || !ok) { alert('寫入失敗，請再試一次。'); return; }
+    var d = new Date(), p = function(x) { return ('0' + x).slice(-2); };
+    ref.child('result').set({
+      round: snap.val(),
+      time: d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()),
+      total: list.length,
+      teams: teams,
+      order: order,
+      ruleApplied: rules.length > 0
+    });
+  });
+}
+
+function reopen() {
+  if (!isHost) return;
+  if (confirm('重新開放報名？目前的分組結果會被清除（報名名單保留）。')) ref.child('result').remove();
+}
+function clearAll() {
+  if (!isHost) return;
+  if (confirm('確定清空所有報名與結果？此動作無法復原。')) ref.remove();
+}
+
+// ===== 顯示結果（所有人同步） =====
+function renderResult() {
+  var area = document.getElementById('resultArea');
+  var reg = document.getElementById('regArea');
+  var shareBtn = document.getElementById('shareBtn');
+  if (!result) { area.innerHTML = ''; reg.style.display = 'block'; shareBtn.style.display = 'none'; lastText = ''; return; }
+  reg.style.display = 'none';
+  var teams = toArr(result.teams).map(toArr);
+  var order = toArr(result.order);
+  var h = '<h2 class="t">🏆 分組結果</h2>';
+  h += '<div class="round">🔄 第 ' + result.round + ' 次分組　📅 ' + esc(result.time) + '</div>';
+  h += '<div class="stats">📊 總共 ' + result.total + ' 人，分成 ' + teams.length + ' 組</div>';
+  h += '<div class="note">🔀 ' + REORDER_TEXT + '</div>';
+  var t = '🏀 羅運籃球3x3分隊系統\n第 ' + result.round + ' 次分組　' + result.time + '\n🔀 ' + REORDER_TEXT + '\n\n';
+  teams.forEach(function(team, i) {
+    h += '<div class="team"><h3>🏆 第 ' + (i + 1) + ' 組 (' + team.length + '人)</h3>';
+    t += '【第 ' + (i + 1) + ' 組】(' + team.length + '人)\n';
+    team.forEach(function(m) {
+      h += '<div class="member">🏀 <strong>' + esc(m.name) + '</strong> - 號碼 ' + m.n + '</div>';
+      t += '🏀 ' + m.name + ' (號碼 ' + m.n + ')\n';
+    });
+    h += '</div>'; t += '\n';
+  });
+  h += '<div class="suborder"><h3>🔀 候補補人順序</h3><div class="hint">所有參加人員隨機排列。人數不足時，請依 1、2、3… 順序補人上場。</div><div class="sg">';
+  t += '🔀 候補補人順序（隨機）\n';
+  order.forEach(function(m, i) {
+    h += '<div class="chip"><i>' + (i + 1) + '</i><span>' + esc(m.name) + '</span></div>';
+    t += (i + 1) + '. ' + m.name + '\n';
+  });
+  h += '</div></div>';
+  if (result.ruleApplied) {
+    var nt = '本次分組套用主辦方設定的避免同組規則';
+    h += '<div class="foot">※ ' + nt + '</div>';
+    t += '\n※ ' + nt + '\n';
+  }
+  area.innerHTML = h;
+  lastText = t;
+  shareBtn.style.display = 'block';
+}
+
+// ===== 分享 / 複製 =====
+function copyLink() {
+  var url = location.origin + location.pathname + '?room=' + room;
+  copyText(url, '✅ 報名連結已複製，請貼到 LINE 群組！');
+}
+function shareResult() {
+  if (!lastText) return;
+  if (navigator.share) navigator.share({ title: '羅運籃球分組結果', text: lastText }).catch(function() { copyText(lastText, '✅ 分組結果已複製！'); });
+  else copyText(lastText, '✅ 分組結果已複製！');
+}
+function copyText(text, okMsg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() { alert(okMsg); }).catch(function() { fallbackCopy(text, okMsg); });
+  } else fallbackCopy(text, okMsg);
+}
+function fallbackCopy(text, okMsg) {
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-999999px';
+  document.body.appendChild(ta); ta.select();
+  try { if (document.execCommand('copy')) alert(okMsg); else alert(text); } catch (e) { alert(text); }
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
