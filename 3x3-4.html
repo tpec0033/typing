@@ -558,12 +558,12 @@ function violates(list, rules) {
   return false;
 }
 
-// 場上位置：後衛(SG/PG 2選1)、前鋒(SF/PF 2選1)、中鋒(C)；成員與位置的配對也是隨機
+// 場上位置：後衛(PG/PF 2選1)、前鋒(SG/SF 2選1)、中鋒(C)；成員與位置的配對也是隨機
 // 3 人組：三個位置各一個；2 人組：從三個位置組別隨機拿掉一個
 function assignPositions(team) {
   var slots = [
-    rnd() < 0.5 ? 'SG' : 'PG',
-    rnd() < 0.5 ? 'SF' : 'PF',
+    rnd() < 0.5 ? 'PG' : 'PF',
+    rnd() < 0.5 ? 'SG' : 'SF',
     'C'
   ];
   if (team.length === 2) slots.splice(Math.floor(rnd() * 3), 1);
