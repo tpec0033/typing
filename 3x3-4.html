@@ -1118,7 +1118,7 @@ function drawResult(ctx, src, totalH) {
     ctx.textAlign = 'left'; ctx.fillStyle = '#5b2a86'; setF(ctx, 'normal', 900, 24);
     ctx.fillText('候補補人順序', ix + 18, y + 30);
     ctx.fillStyle = '#7b4fb5'; setF(ctx, 'normal', 600, 16);
-    ctx.fillText('人數不足時，請依 1、2、3… 順序補人上場', ix + 18, y + 58);
+    ctx.fillText('在場上或PLAY直接跳過，已在場上補若換自己隊PLAY則下場休息換下一人補上-不可拋棄原隊友，4:30後隨便你補', ix + 18, y + 58);
     order.forEach(function(m, k) {
       var c = k % cols, r = Math.floor(k / cols);
       var x = ix + 16 + c * (cwid + gap), yy = y + 76 + r * (chipH + gap);
