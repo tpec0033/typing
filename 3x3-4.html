@@ -662,7 +662,7 @@ function makeDraft(pool) {
   var tries = 0;
   do { shuffle(list); tries++; } while (rules.length > 0 && violates(list, rules) && tries < MAX_RETRY);
   var failed = rules.length > 0 && violates(list, rules);
-  if (failed) setTimeout(function() { alert('系統出現問題'); }, 50);
+  if (failed) setTimeout(function() { alert('確認沒問題); }, 50);
 
   // 組別順序隨機，但三人組排前面，兩人組一律退到最後
   var teams = shuffle(createTeams(list).slice());
