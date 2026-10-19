@@ -94,7 +94,7 @@ button.linkbtn { background:none; box-shadow:none; color:#7a7a8c; font-size:14px
 .entry .tg.ok { color:#1ea85a; } .entry .tg.no { color:#e08a00; } .entry .tg.hs { color:#7b2ff7; }
 .idx { min-width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#7b2ff7,#5b2a86); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; box-shadow:0 3px 6px rgba(91,42,134,.35); flex-shrink:0; }
 .entry button { width:auto; padding:6px 14px; margin:0; font-size:13px; border-radius:10px; }
-.akatxt { font-size:12px; font-weight:600; color:#d32f2f; margin-left:8px; }
+.txt { font-size:12px; font-weight:600; color:#d32f2f; margin-left:8px; }
 
 /* ===== 主持人區（簡化版） ===== */
 .htop { text-align:center; font-size:18px; font-weight:800; color:#1e7a47; margin:2px 0 12px; }
@@ -125,7 +125,7 @@ h2.t { text-align:center; margin:14px 0 12px; font-size:26px; font-weight:900; c
 .team .head small { margin-left:auto; font-size:12px; font-weight:800; background:rgba(255,255,255,.2); padding:3px 10px; border-radius:20px; }
 .team .body { padding:6px 12px 8px; }
 
-/* 每位成員：位置(紅斜體) 姓名(黑) [aka](灰底小一號、斜體) AKA內容(紫、斜體)；位置、姓名、AKA內容字體一樣大 */
+/* 每位成員：位置(紅斜體) 姓名(黑) [](灰底小一號、斜體) 內容(紫、斜體)；位置、姓名、AKA內容字體一樣大 */
 .member { display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 8px; padding:11px 6px; font-size:18px; border-bottom:1px dashed #ece8f7; }
 .member:last-child { border-bottom:none; }
 .member .no2 { color:#8a8a99; font-weight:800; font-size:18px; margin-right:-2px; }
@@ -181,8 +181,8 @@ h2.t { text-align:center; margin:14px 0 12px; font-size:26px; font-weight:900; c
       <div id="pinBox" style="display:none">
         <div class="formlbl"><span>主持人姓名</span><span>AKA（選填）</span></div>
         <div class="formrow">
-          <input type="text" id="hostNameInput" class="f1" maxlength="10" placeholder="輸入姓名">
-          <input type="text" id="hostAkaInput" class="f2" maxlength="5" placeholder="最多5字">
+          <input type="text" id="hostNameInput" class="f1" maxlength="5" placeholder="輸入姓名">
+          <input type="text" id="hostAkaInput" class="f2" maxlength="6" placeholder="最多6字">
         </div>
         <input type="password" id="pinInput" placeholder="請輸入主持人密碼" onkeypress="if(event.key==='Enter')startRoom()">
         <button class="orange" onclick="startRoom()">🚀 進入</button>
